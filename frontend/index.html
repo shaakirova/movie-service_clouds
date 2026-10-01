@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Movies</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+    <h1>My Movies</h1>
+    <p class="subtitle">Моя коллекция фильмов</p>
+
+    <form id="movie-form">
+        <input
+                type="text"
+                id="title"
+                placeholder="Название фильма"
+                required
+        >
+
+        <input
+                type="text"
+                id="genre"
+                placeholder="Жанр"
+        >
+
+        <select id="rating">
+            <option value="">Оценка</option>
+            <option value="10">10</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+        </select>
+
+        <select id="status">
+            <option value="Хочу посмотреть">Хочу посмотреть</option>
+            <option value="Смотрю">Смотрю</option>
+            <option value="Просмотрено">Просмотрено</option>
+        </select>
+
+        <button type="submit">Добавить фильм</button>
+    </form>
+
+    <h2>Мои фильмы</h2>
+
+    <div id="movies"></div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
