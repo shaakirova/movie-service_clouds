@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, make_response
 from dotenv import load_dotenv
 import psycopg2
 import os
@@ -8,8 +8,13 @@ load_dotenv()
 app = Flask(__name__)
 
 FRONTEND_FOLDER = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend"
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "frontend"
 )
+
+# Для запуска нескольких копий backend
+INSTANCE_ID = os.getenv("INSTANCE_ID", "backend-default")
+PORT = int(os.getenv("PORT", "5000"))
 
 
 def get_db_connection():
@@ -34,7 +39,7 @@ def create_table():
             rating INTEGER,
             status VARCHAR(50)
         );
-    """
+        """
     )
 
     conn.commit()
@@ -62,7 +67,9 @@ def get_movies():
     conn = get_db_connection()
     cur = conn.cursor()
 
-    cur.execute("SELECT id, title, genre, rating, status FROM movies ORDER BY id;")
+    cur.execute(
+        "SELECT id, title, genre, rating, status FROM movies ORDER BY id;"
+    )
 
     rows = cur.fetchall()
 
@@ -82,7 +89,10 @@ def get_movies():
             }
         )
 
-    return jsonify(movies)
+    response = make_response(jsonify(movies))
+    response.headers["X-Backend-Instance"] = INSTANCE_ID
+
+    return response
 
 
 @app.route("/api/movies", methods=["POST"])
@@ -98,7 +108,12 @@ def add_movie():
         VALUES (%s, %s, %s, %s)
         RETURNING id;
         """,
-        (data["title"], data.get("genre"), data.get("rating"), data.get("status")),
+        (
+            data["title"],
+            data.get("genre"),
+            data.get("rating"),
+            data.get("status"),
+        ),
     )
 
     movie_id = cur.fetchone()[0]
@@ -107,9 +122,22 @@ def add_movie():
     cur.close()
     conn.close()
 
-    return jsonify({"message": "Movie added", "id": movie_id}), 201
+    response = make_response(
+        jsonify(
+            {
+                "message": "Movie added",
+                "id": movie_id,
+            }
+        ),
+        201,
+    )
+
+    response.headers["X-Backend-Instance"] = INSTANCE_ID
+
+    return response
 
 
 if __name__ == "__main__":
     create_table()
-    app.run(debug=True, port=5000)
+    print(f"Starting {INSTANCE_ID} on port {PORT}")
+    app.run(debug=False, port=PORT)
